@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthController {
 	
+	// 로그인, 로그아웃, 회원가입
+	
 	private final AuthService authService;
 
 	// 주소:인증이 안되었을 때 /user, /post, 인증이 되든 말든 무조건 온다. /loginForm
