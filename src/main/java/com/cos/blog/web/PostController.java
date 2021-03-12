@@ -1,9 +1,5 @@
 package com.cos.blog.web;
 
-import java.util.List;
-
-import javax.servlet.RequestDispatcher;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -13,7 +9,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.cos.blog.config.auth.PrincipalDetails;
 import com.cos.blog.domain.post.Post;
@@ -30,12 +25,18 @@ public class PostController {
 
 	@GetMapping("/")
 	public String findAll(Model model,
-			@PageableDefault(sort = "id", direction = Sort.Direction.DESC, size = 3) Pageable pageable) {
+			@PageableDefault(sort = "id", direction = Sort.Direction.DESC, size = 3) Pageable pageable,
+			@AuthenticationPrincipal PrincipalDetails principalDetails) {
+		
+		System.out.println("누구로 로그인 됬을까?");
+		System.out.println(principalDetails.getAttributes());
+		System.out.println(principalDetails.getUser().getUsername());
+		System.out.println(principalDetails.isOAuth());
 
 		Page<Post> posts = postService.전체찾기(pageable);
 		model.addAttribute("posts", posts);
 		return "post/list";
-	}	
+	}
 
 	@GetMapping("/post/saveForm")
 	public String saveForm() {

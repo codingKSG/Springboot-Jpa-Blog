@@ -2,21 +2,41 @@ package com.cos.blog.config.auth;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import com.cos.blog.domain.user.User;
 
 import lombok.Data;
 
 @Data
-public class PrincipalDetails implements UserDetails {
+public class PrincipalDetails implements UserDetails, OAuth2User {
 
 	private User user;
+	private Map<String, Object> attribytes; // OAuth 제공자로 부터 받은 회원 정보
+	private boolean isOAuth;
 
 	public PrincipalDetails(User user) {
 		this.user = user;
+	}
+	
+	public PrincipalDetails(User user, Map<String, Object> attribytes) {
+		this.user = user;
+		this.attribytes = attribytes;
+		this.isOAuth = true;
+	}
+
+	@Override
+	public Map<String, Object> getAttributes() {
+		return attribytes;
+	}
+
+	@Override
+	public String getName() {
+		return "몰러~ ";
 	}
 
 	@Override
@@ -62,7 +82,7 @@ public class PrincipalDetails implements UserDetails {
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 
 		Collection<GrantedAuthority> collecters = new ArrayList<>();
-		collecters.add(() -> "ROLE_"+user.getRole().name());
+		collecters.add(() -> "ROLE_" + user.getRole().name());
 		return collecters;
 	}
 
