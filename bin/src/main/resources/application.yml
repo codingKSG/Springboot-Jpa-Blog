@@ -1,0 +1,57 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+    encoding:
+      charset: utf-8
+      enabled: true
+    
+spring:
+  mvc:
+    view:
+      prefix: /WEB-INF/views/
+      suffix: .jsp
+      
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/pos?serverTimezone=Asia/Seoul
+    username: pos
+    password: cos1234
+    
+  jpa:
+    open-in-view: true
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      use-new-id-generator-mappings: false
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+      
+# OAuth 순서 3
+  security:
+    oauth2:
+      client:
+        registration:
+#       자동완성 안되는 구간
+#       승인된 리디렉션 URI http://localhost:8080/login/oauth2/code/google <- 마지막에 들어갈 단어
+          google:
+#         자동완성 가능
+#         어떠한 정보(변수 정보)를 제공해주는지 찾아야함 (구글로 가서)
+            client-id: 421459831212-i2edhu36jc0ud9et27qu9sh36k6ffumn.apps.googleusercontent.com
+            client-secret: B9bbpN7z2mmbSWB7ZJleydiR
+            scope:
+            - email
+            - profile
+          facebook:
+            client-id: 2138839010296967
+            client-secret: c136807e6e6f36cc754d8a2f9cf0e79a
+            scope:
+            - email
+            - public_profile

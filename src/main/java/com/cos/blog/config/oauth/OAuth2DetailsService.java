@@ -1,5 +1,6 @@
 package com.cos.blog.config.oauth;
 
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,19 +21,21 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class OAuth2DetailsService extends DefaultOAuth2UserService {
-	
+
 	private final UserRepository userRepository;
 
 	@Override
 	public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 		System.out.println("OAuth 로그인 진행중.......");
 		System.out.println("getAccessToken: " + userRequest.getAccessToken().getTokenValue());
-
-		// 1. Access Token으로 회원정보를 받았다는 의미
+		// 1. Access Token으로 회원정보를 받았다는 의미 (AccessToken은 userRequest가 들고 있음)
 		OAuth2User oAuth2User = super.loadUser(userRequest);
 
+		System.out.println("===================================================");
+		System.out.println(oAuth2User.getAttributes());
+		System.out.println("===================================================");
+
 		// 레트로핏
-		System.out.println("oauth2User: " + oAuth2User.getAttributes());
 		return processOAuth2User(userRequest, oAuth2User);
 	}
 
@@ -42,31 +45,38 @@ public class OAuth2DetailsService extends DefaultOAuth2UserService {
 		// 각 Resource Server에서 던지는 Attribute 정보가 다르기 때문
 		System.out.println("로그인 된 곳은? " + userRequest.getClientRegistration().getClientName());
 
+//      System.out.println(userRequest.getClientRegistration().getClientId());
+//      System.out.println(userRequest.getClientRegistration().getClientSecret());
+//      System.out.println(userRequest.getClientRegistration().getRedirectUri());
+//      System.out.println(userRequest.getAccessToken());
+//      System.out.println(userRequest.getClientRegistration().getClientName());
+		String clientName = userRequest.getClientRegistration().getClientName();
+
 		OAuth2UserInfo oAuth2UserInfo = null;
-		if (userRequest.getClientRegistration().getClientName().equals("Google")) {
+		if (clientName.equals("Google")) {
 			oAuth2UserInfo = new GoogleInfo(oAuth2User.getAttributes());
-		} else if(userRequest.getClientRegistration().getClientName().equals("Facebook")) {
+		} else if (clientName.equals("Facebook")) {
 			oAuth2UserInfo = new FacebookInfo(oAuth2User.getAttributes());
+		} else if (clientName.equals("Naver")) {
+			oAuth2UserInfo = new NaverInfo((Map)(oAuth2User.getAttributes().get("response")));
+		} else if (clientName.equals("Kakao")) {
+			oAuth2UserInfo = new KakaoInfo((Map)(oAuth2User.getAttributes()));
 		}
-		
+
 		// 2. 최초 o: 회원가입 + 로그인, 최초 x: 로그인
 		User userEntity = userRepository.findByUsername(oAuth2UserInfo.getUsername());
-		
+
 		UUID uuid = UUID.randomUUID();
 		String endPassword = new BCryptPasswordEncoder().encode(uuid.toString());
-		
-		if(userEntity == null) {
-			User user = User.builder()
-					.username(oAuth2UserInfo.getUsername())
-					.password(endPassword)
-					.email(oAuth2UserInfo.getEmail())
-					.role(RoleType.USER)
-					.build();
+
+		if (userEntity == null) {
+			User user = User.builder().username(oAuth2UserInfo.getUsername()).password(endPassword)
+					.email(oAuth2UserInfo.getEmail()).role(RoleType.USER).build();
 			userEntity = userRepository.save(user);
 			return new PrincipalDetails(userEntity, oAuth2User.getAttributes());
 		} else { // 이미 회원가입이 완료 됬다는 뜻(원래는 구글정보가 변경될 수 있기 때문에 Update를 쳐줘야함 - 나중 구현)
 			// Update 로직 들어가야함
-			
+
 			return new PrincipalDetails(userEntity, oAuth2User.getAttributes());
 		}
 	}

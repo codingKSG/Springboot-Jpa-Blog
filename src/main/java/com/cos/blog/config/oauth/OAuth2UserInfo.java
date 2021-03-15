@@ -13,11 +13,11 @@ public abstract class OAuth2UserInfo {
 		return attributes;
 	}
 
-	// 강제성 부여
-	public abstract String getUsername();
-	
+	// 강제성 부여	
 	public abstract String getId();
 
+	public abstract String getUsername();
+	
 	public abstract String getName();
 
 	public abstract String getEmail();
