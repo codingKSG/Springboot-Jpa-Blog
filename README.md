@@ -8,7 +8,7 @@
 ## DB 설정
 
 ```sql
-create user 'pos'@'%' identified by 'cos1234';
+create user 'pos'@'%' identified by 'pos1234';
 GRANT ALL PRIVILEGES ON *.* TO 'pos'@'%';
 create database pos;
 ```
